@@ -4,6 +4,7 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
 import requests
+from bs4 import BeautifulSoup
 cookie=""
 
 def login():
@@ -16,7 +17,7 @@ def login():
     while not atera:
         goiburuak = {'Host': 'egela.ehu.eus', 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': str(len(datuak)), "Cookie" : cookie}
         erantzuna = requests.request(metodoa, uneko_uria, data=datuak, headers=goiburuak, allow_redirects=False)
-        atera = (erantzuna.status_code == 200 and "eGela UPV/EHU: Sartu gunean" not in str(erantzuna.content))
+        atera = (erantzuna.status_code == 200 and "ANDER SAN JUAN" in str(erantzuna.content))
         if ("Location" in erantzuna.headers and erantzuna.status_code == 303): ## berbideraketa egin
             print(uneko_uria + " hurrengo orria eramango gaitu "+ erantzuna.headers['Location'] )
             uneko_uria=erantzuna.headers['Location']
@@ -26,20 +27,31 @@ def login():
             izena = str(input("Sartu zure LDAP\t"))
             pasahitza = str(input("Sartu zure pasahitza\t")) ##begiratu behar dut pasahitza kontsolan ez ikusteko zer egin
             datuak = {'username': izena , 'password': pasahitza}
-    ondo = "ANDER SAN JUAN" in str(erantzuna.content)
-    if(ondo):
-        print("Login-a ondo egin da")
+    print("Login-a ondo egin da")
 
 # Press the green button in the gutter to run the script.
-def pdfDeskargatu():
+def jaitsiPDF(soup):
+    guztiak = soup.find_all("div", {"class": "activityinstance"})
+    for unekoPDF in guztiak:
+        if unekoPDF.find("img", {"src": "https://egela.ehu.eus/theme/image.php/fordson/core/1611567512/f/pdf"}):
+            download = unekoPDF.find('a', href=True)['href'] + '&redirect=1'
+            filename = str(unekoPDF).split("view.php?")[1].split("\"")[0] + '.pdf'
+
+
+def lortuIkasgaia():
     metodoa = 'POST'
     datuak= ""
     uneko_uria= "https://egela.ehu.eus/course/view.php?id=42336"
     goiburuak = {'Host': 'egela.ehu.eus', 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': str(len(datuak)), "Cookie" : cookie}
     erantzuna = requests.request(metodoa, uneko_uria, data=datuak, headers=goiburuak, allow_redirects=False)
-    print(str(erantzuna.status_code) +" "+ uneko_uria)
+    if(erantzuna.status_code == 200):
+        print("Ikasgaiaren orria ondo lortu da")
+        soup = BeautifulSoup(erantzuna.content, "html.parser")
+        jaitsiPDF(soup)
+    else:
+        print("rria ez da ondo lortu")
 
 if __name__ == '__main__':
     login()
-    pdfDeskargatu()
+    lortuIkasgaia()
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
