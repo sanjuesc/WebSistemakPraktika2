@@ -29,8 +29,7 @@ def login():
                 0]  # soilik cookie berria interesatzen zaigu, ezabatzen dena ez
         if (erantzuna.status_code == 200 and "eGela UPV/EHU: Sartu gunean" in str(erantzuna.content)):
             izena = str(input("Sartu zure LDAP\t"))
-            pasahitza = str(
-                input("Sartu zure pasahitza\t"))  ##begiratu behar dut pasahitza kontsolan ez ikusteko zer egin
+            pasahitza = str(input("Sartu zure pasahitza\t"))  ##begiratu behar dut pasahitza kontsolan ez ikusteko zer egin
             datuak = {'username': izena, 'password': pasahitza}
     print("Login-a ondo egin da")
 
@@ -43,12 +42,17 @@ def jaitsiPDF(soup):
         if unekoPDF.find("img", {"src": "https://egela.ehu.eus/theme/image.php/fordson/core/1611567512/f/pdf"}):
             uria = str(unekoPDF).split("onclick=\"window.open('")[1].split("\'")[0].replace("amp;","")
             filename = str(unekoPDF).split("view.php?")[1].split("\"")[0] + '.pdf'
-            r = requests.get(uria, stream=True, allow_redirects=True)##esto no funca aun
-            print(r.headers)
-            print(r.status_code)
-            #with open(filename, 'wb') as fd: #https://stackoverflow.com/questions/34503412/download-and-save-pdf-file-with-python-requests-module
-            #    for chunk in r.iter_content():
-            #        fd.write(chunk)
+            metodoa = 'POST'
+            datuak = ""
+            goiburuak = {'Host': 'egela.ehu.eus', 'Content-Type': 'application/x-www-form-urlencoded',
+                             'Content-Length': str(len(datuak)), "Cookie": cookie}
+            erantzuna = requests.request(metodoa, uria, data=datuak, headers=goiburuak, allow_redirects=False)
+            pdfURI= erantzuna.headers['Location']
+            print(pdfURI)
+            erantzuna = requests.request(metodoa, pdfURI, data=datuak, headers=goiburuak, allow_redirects=False)
+            with open(filename, 'wb') as fd: #  https://stackoverflow.com/questions/34503412/download-and-save-pdf-file-with-python-requests-module
+                for chunk in erantzuna.iter_content():
+                    fd.write(chunk)
 
 
 
