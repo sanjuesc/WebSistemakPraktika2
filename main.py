@@ -41,15 +41,14 @@ def jaitsiPDF(soup):
     for unekoPDF in guztiak:
         if unekoPDF.find("img", {"src": "https://egela.ehu.eus/theme/image.php/fordson/core/1611567512/f/pdf"}):
             uria = str(unekoPDF).split("onclick=\"window.open('")[1].split("\'")[0].replace("amp;","")
-            filename = str(unekoPDF).split("view.php?")[1].split("\"")[0] + '.pdf'
             metodoa = 'POST'
             datuak = ""
             goiburuak = {'Host': 'egela.ehu.eus', 'Content-Type': 'application/x-www-form-urlencoded',
                              'Content-Length': str(len(datuak)), "Cookie": cookie}
             erantzuna = requests.request(metodoa, uria, data=datuak, headers=goiburuak, allow_redirects=False)
             pdfURI= erantzuna.headers['Location']
-            print(pdfURI)
             erantzuna = requests.request(metodoa, pdfURI, data=datuak, headers=goiburuak, allow_redirects=False)
+            filename = pdfURI.split("mod_resource/content/")[1].split("/")[1].replace("%20", "_")
             with open(filename, 'wb') as fd: #  https://stackoverflow.com/questions/34503412/download-and-save-pdf-file-with-python-requests-module
                 for chunk in erantzuna.iter_content():
                     fd.write(chunk)
