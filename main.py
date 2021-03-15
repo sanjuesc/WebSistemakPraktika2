@@ -2,6 +2,7 @@
 
 # Press Mayús+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from datetime import date
 
 import requests
 from bs4 import BeautifulSoup
@@ -11,26 +12,30 @@ cookie = ""
 
 def login():
     global cookie
-    atera = False
     metodoa = 'POST'
     datuak = ""
     uneko_uria = "https://egela.ehu.eus"
-
-    while not atera:
+    eginda = False
+    while not eginda:
+        print(metodoa)
+        print(uneko_uria)
+        if len(datuak)>0:
+            print(datuak)
         goiburuak = {'Host': 'egela.ehu.eus', 'Content-Type': 'application/x-www-form-urlencoded',
                      'Content-Length': str(len(datuak)), "Cookie": cookie}
         erantzuna = requests.request(metodoa, uneko_uria, data=datuak, headers=goiburuak, allow_redirects=False)
-        atera = (erantzuna.status_code == 200 and "ANDER SAN JUAN" in str(erantzuna.content))
-        if (erantzuna.status_code == 303):  ## berbideraketa egin
-            print(uneko_uria + " hurrengo orria eramango gaitu " + erantzuna.headers['Location'])
+        eginda = (erantzuna.status_code == 200 and "ANDER SAN JUAN" in str(erantzuna.content))
+        if erantzuna.status_code == 303:  ## berbideraketa egin
+            #print(uneko_uria + " hurrengo orria eramango gaitu " + erantzuna.headers['Location'])
             uneko_uria = erantzuna.headers['Location']
         if "Set-Cookie" in erantzuna.headers:  ## cookiea gorde
-            cookie = erantzuna.headers["Set-Cookie"].split(';')[
-                0]  # soilik cookie berria interesatzen zaigu, ezabatzen dena ez
-        if (erantzuna.status_code == 200 and "eGela UPV/EHU: Sartu gunean" in str(erantzuna.content)):
+            cookie = erantzuna.headers["Set-Cookie"].split(';')[0]  # soilik cookie berria interesatzen zaigu, ezabatzen dena ez
+        if erantzuna.status_code == 200 and "eGela UPV/EHU: Sartu gunean" in str(erantzuna.content):
             izena = str(input("Sartu zure LDAP\t"))
             pasahitza = str(input("Sartu zure pasahitza\t"))  ##begiratu behar dut pasahitza kontsolan ez ikusteko zer egin
             datuak = {'username': izena, 'password': pasahitza}
+        else:
+            datuak={}
     print("Login-a ondo egin da")
 
 
