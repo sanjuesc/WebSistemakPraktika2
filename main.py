@@ -1,8 +1,4 @@
-# This is a sample Python script.
-
-# Press Mayús+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-from datetime import date
+import getpass
 
 import requests
 from bs4 import BeautifulSoup
@@ -17,14 +13,14 @@ def login():
     uneko_uria = "https://egela.ehu.eus"
     eginda = False
     while not eginda:
-        print(metodoa)
-        print(uneko_uria)
+        print("\n"+metodoa + " " +uneko_uria)
         if len(datuak)>0:
             print(datuak)
         goiburuak = {'Host': 'egela.ehu.eus', 'Content-Type': 'application/x-www-form-urlencoded',
                      'Content-Length': str(len(datuak)), "Cookie": cookie}
         erantzuna = requests.request(metodoa, uneko_uria, data=datuak, headers=goiburuak, allow_redirects=False)
         eginda = (erantzuna.status_code == 200 and "ANDER SAN JUAN" in str(erantzuna.content))
+        print(str(erantzuna.status_code) + " " + erantzuna.reason)
         if erantzuna.status_code == 303:  ## berbideraketa egin
             #print(uneko_uria + " hurrengo orria eramango gaitu " + erantzuna.headers['Location'])
             uneko_uria = erantzuna.headers['Location']
@@ -37,15 +33,15 @@ def login():
         else:
             datuak={}
     print("Login-a ondo egin da")
+    print("Azkenengo erantzunaren edukia: \n")
+    print(erantzuna.content)
 
-
-# Press the green button in the gutter to run the script.
 def jaitsiPDF(soup):
     uria=""
-    guztiak = soup.find_all("div", {"class": "activityinstance"})
-    for unekoPDF in guztiak:
-        if unekoPDF.find("img", {"src": "https://egela.ehu.eus/theme/image.php/fordson/core/1611567512/f/pdf"}):
-            uria = str(unekoPDF).split("onclick=\"window.open('")[1].split("\'")[0].replace("amp;","")
+    divGuztiak = soup.find_all("div", {"class": "activityinstance"})
+    for unekoa in divGuztiak:
+        if unekoa.find("img", {"src": "https://egela.ehu.eus/theme/image.php/fordson/core/1611567512/f/pdf"}): #egelako elementuetatik, pdf bezala agertzen direnak bilatu
+            uria = str(unekoa).split("onclick=\"window.open('")[1].split("\'")[0].replace("amp;","")
             metodoa = 'POST'
             datuak = ""
             goiburuak = {'Host': 'egela.ehu.eus', 'Content-Type': 'application/x-www-form-urlencoded',
@@ -53,7 +49,7 @@ def jaitsiPDF(soup):
             erantzuna = requests.request(metodoa, uria, data=datuak, headers=goiburuak, allow_redirects=False)
             pdfURI= erantzuna.headers['Location']
             erantzuna = requests.request(metodoa, pdfURI, data=datuak, headers=goiburuak, allow_redirects=False)
-            filename = pdfURI.split("mod_resource/content/")[1].split("/")[1].replace("%20", "_")
+            filename = pdfURI.split("mod_resource/content/")[1].split("/")[1].replace("%20", "_") #fitxategiaren izena ondo ikusteko
             with open(filename, 'wb') as fd: #  https://stackoverflow.com/questions/34503412/download-and-save-pdf-file-with-python-requests-module
                 for chunk in erantzuna.iter_content():
                     fd.write(chunk)
