@@ -35,6 +35,7 @@ def login():
     print("Login-a ondo egin da")
     print("Azkenengo erantzunaren edukia: \n")
     print(erantzuna.content)
+    return uneko_uria
 
 def jaitsiPDF(soup):
     uria=""
@@ -56,12 +57,19 @@ def jaitsiPDF(soup):
 
 
 
-def lortuIkasgaia():
+def lortuIkasgaia(uneko_uria):
     metodoa = 'POST'
     datuak = ""
-    uneko_uria = "https://egela.ehu.eus/course/view.php?id=42336"
     goiburuak = {'Host': 'egela.ehu.eus', 'Content-Type': 'application/x-www-form-urlencoded',
                  'Content-Length': str(len(datuak)), "Cookie": cookie}
+    erantzuna = requests.request(metodoa, uneko_uria, data=datuak, headers=goiburuak, allow_redirects=False)
+    soup = BeautifulSoup(erantzuna.content, "html.parser")
+    ikasgaiak = soup.find_all("a", {"class": "ehu-visible"})
+    for x in ikasgaiak:
+        if("Web Sistemak" in x):
+            uneko_uria=x["href"]
+            break
+
     erantzuna = requests.request(metodoa, uneko_uria, data=datuak, headers=goiburuak, allow_redirects=False)
     if (erantzuna.status_code == 200):
         print("Ikasgaiaren orria ondo lortu da")
@@ -72,6 +80,6 @@ def lortuIkasgaia():
 
 
 if __name__ == '__main__':
-    login()
-    lortuIkasgaia()
+    egelaOrria=login()
+    lortuIkasgaia(egelaOrria)
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
