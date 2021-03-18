@@ -12,7 +12,7 @@ def login():
     datuak = ""
     uneko_uria = "https://egela.ehu.eus"
     eginda = False
-    while not eginda:
+    while not eginda: #loop batekin hasierako eskaerak egitea erabaki dut, bestela 5 aldiz ia kode berbera idatzi beharko nuke
         print("\n"+metodoa + " " +uneko_uria)
         if len(datuak)>0:
             print(datuak)
