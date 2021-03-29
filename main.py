@@ -65,7 +65,7 @@ def lortuIkasgaia(uneko_uria):
     erantzuna = requests.request(metodoa, uneko_uria, data=datuak, headers=goiburuak, allow_redirects=False)
     soup = BeautifulSoup(erantzuna.content, "html.parser")
     ikasgaiak = soup.find_all("a", {"class": "ehu-visible"})
-    for x in ikasgaiak:
+    for x in ikasgaiak: #web sistemak irakasgaiaren URI-a lortu
         if("Web Sistemak" in x):
             uneko_uria=x["href"]
             break
@@ -82,4 +82,4 @@ def lortuIkasgaia(uneko_uria):
 if __name__ == '__main__':
     egelaOrria=login()
     lortuIkasgaia(egelaOrria)
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
